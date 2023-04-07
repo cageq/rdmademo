@@ -1,0 +1,3 @@
+[submodule "opt/rdma-core"]
+	path = opt/rdma-core
+	url = https://ghproxy.com/https://github.com/linux-rdma/rdma-core.git
