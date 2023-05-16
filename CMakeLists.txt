@@ -55,8 +55,11 @@ endif()
 
 
 
+link_directories(opt/core) 
 
 add_executable(rdmasrv src/rdma_server.cpp)
+target_link_libraries(rdmasrv rdma_util ibverbs rdmacm) 
 add_executable(rdmacli src/rdma_client.cpp)
+target_link_libraries(rdmacli rdma_util ibverbs rdmacm) 
 
 
