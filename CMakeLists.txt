@@ -37,6 +37,8 @@ include_directories(src)
 include_directories(opt/htflog/include)
 include_directories(opt/concurrentqueue/)
 
+include_directories(./opt/rdma-core/build/include)
+link_directories(./opt/rdma-core/build/)
 
 link_directories(bin)
 set(KBUSVER  kbus-v1.0.1208) 
