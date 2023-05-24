@@ -1,5 +1,6 @@
 cmake_minimum_required(VERSION 3.13)
-project (rdma VERSION 0.6 )
+ 
+project (rdmanet VERSION 0.6 )
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
@@ -15,55 +16,28 @@ elseif(WIN32)
 endif()
 
 
-
-
-
 string(TIMESTAMP COMPILE_TIME "%Y/%m/%d %H:%M:%S")
-set(HDS_BUILD_TIME  ${COMPILE_TIME})
-set(HDS_VERSION_MAJOR  3) 
-set(HDS_VERSION_MINOR  0) 
-set(HDS_VERSION_BUILD  317) 
-set(HDS_VERSION_FLAG   beta)
+set(RDMA_BUILD_TIME  ${COMPILE_TIME})
+set(RDMA_VERSION_MAJOR  3) 
+set(RDMA_VERSION_MINOR  0) 
+set(RDMA_VERSION_BUILD  317) 
+set(RDMA_VERSION_FLAG   beta)
 
 configure_file(src/version.h.in src/version.h)
 
 
-include_directories(opt/asio-1.22.1/include)
-include_directories(opt/knet/include)
 
-include_directories(opt/fmt-9.1.0/include)
 include_directories(include)
 include_directories(src)
-include_directories(opt/htflog/include)
-include_directories(opt/concurrentqueue/)
 
-include_directories(./opt/rdma-core/build/include)
-link_directories(./opt/rdma-core/build/)
-link_directories(./opt/rdma-core/build/lib)
-
-link_directories(bin)
-set(KBUSVER  kbus-v1.0.1208) 
-include_directories(opt/${KBUSVER}/include )
-link_directories(opt/${KBUSVER}/lib)
-
-if(WITH_PYHDS)
-include_directories(bin/python/include/python3.9)
-link_directories(bin/python/lib) 
-include_directories(opt/pybind11/include)
-add_library(pyhds SHARED src/pyhds.cpp)
-target_compile_options(pyhds PRIVATE -frtti  -fvisibility=default)
-target_link_libraries(pyhds hds ) 
-endif() 
+include_directories(opt/rdma-core/build/include/)
+add_library(rdmanet src/rdma_connection.cpp src/rdma_server.cpp src/rdma_client.cpp)
 
 
+link_directories(opt/rdma-core/build/lib )
+link_directories(opt/rdma-core/build/util)
 
-
-
-link_directories(opt/core) 
-
-add_executable(rdmasrv src/rdma_server.cpp)
-target_link_libraries(rdmasrv rdma_util ibverbs rdmacm) 
-add_executable(rdmacli src/rdma_client.cpp)
-target_link_libraries(rdmacli rdma_util ibverbs rdmacm) 
-
-
+add_executable(rclient samples/rclient.cpp)
+target_link_libraries(rclient rdmanet rdma_util ibverbs rdmacm )
+add_executable(rserver samples/rserver.cpp)
+target_link_libraries(rserver rdmanet rdma_util ibverbs rdmacm )
