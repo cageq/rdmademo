@@ -34,7 +34,8 @@ void RdmaConnection::init(rdma_cm_id *id ){
     this->recv_mr = ibv_reg_mr(rdma_context->pd, this->recv_region,
                                       BUFFER_SIZE, IBV_ACCESS_LOCAL_WRITE);
 
-    do_read(); 
+    int ret = do_read(); 
+    printf("start to read %d\n", ret); 
 }
 
 int RdmaConnection::send(const char * data, uint32_t dataLen){            
@@ -61,8 +62,6 @@ int RdmaConnection::send(const char * data, uint32_t dataLen){
 }
 
 int RdmaConnection::do_read(){
-
-      
     struct ibv_recv_wr wr, *bad_wr = nullptr;
     struct ibv_sge sge;
 

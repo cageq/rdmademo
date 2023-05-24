@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.13)
  
 project (rdmanet VERSION 0.6 )
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
@@ -41,3 +41,12 @@ add_executable(rclient samples/rclient.cpp)
 target_link_libraries(rclient rdmanet rdma_util ibverbs rdmacm )
 add_executable(rserver samples/rserver.cpp)
 target_link_libraries(rserver rdmanet rdma_util ibverbs rdmacm )
+
+
+
+
+add_executable(client samples/client.cpp)
+target_link_libraries(client rdmanet rdma_util ibverbs rdmacm )
+add_executable(server samples/server.cpp)
+target_link_libraries(server rdmanet rdma_util ibverbs rdmacm )
+

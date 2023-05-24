@@ -27,6 +27,7 @@ void RdmaClient::run() {
       break;
     }
   }
+   printf("quiting ...\n"); 
 }
 
 int RdmaClient::on_event(struct rdma_cm_event *event) {

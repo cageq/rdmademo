@@ -1,11 +1,13 @@
 #pragma once
+#include <string> 
+#include <inttypes.h>
 #include "rdma_connection.h"
 #include "rdma_context.h"
 
 class RdmaServer {
 
     public:
-      int start()  ; 
+      int start(uint16_t port , const std::string & host = "0.0.0.0")  ; 
 
       void init_context(struct ibv_context *verbs) ; 
       void init_qp_attr(struct ibv_qp_init_attr *qp_attr)  ; 

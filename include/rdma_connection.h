@@ -21,7 +21,9 @@ public:
         
 
         int do_read();
-        void on_event(int evt){}
+        void on_event(int evt){
+	    printf("on rdma event %d\n", evt); 
+	}
         void on_read( uint32_t len){
             printf("received message: %d\n", len);
         }

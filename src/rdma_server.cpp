@@ -1,16 +1,18 @@
 #include "rdma_server.h"
 #include "rdma_connection.h"
 
-int RdmaServer::start() {
+int RdmaServer::start(uint16_t port , const std::string & host  ) {
 
-#if _USE_IPV6
-  struct sockaddr_in6 addr;
-#else
-  struct sockaddr_in addr;
-#endif
+    #if _USE_IPV6
+    struct sockaddr_in6 addr;
+    #else
+    struct sockaddr_in addr;
+    #endif
 
  
   memset(&addr, 0, sizeof(addr));
+//  addr.sin_port = htons(port); 
+ // addr.sin_addr.s_addr = htonl(INADDR_ANY); 
 #if _USE_IPV6
   addr.sin6_family = AF_INET6;
 #else
@@ -22,15 +24,13 @@ int RdmaServer::start() {
   rdma_bind_addr(listener, (struct sockaddr *)&addr);
   rdma_listen(listener, 10); /* backlog=10 is arbitrary */
 
-  uint16_t port = ntohs(rdma_get_src_port( listener)); // rdma_get_src_port 返回listener对应的tcp 端口
-
-  printf("listening on port %d.\n", port);
+  uint16_t lisPort = ntohs(rdma_get_src_port( listener)); // rdma_get_src_port 返回listener对应的tcp 端口
+  printf("listening on port %d.\n", lisPort);
   struct rdma_cm_event *event = nullptr;
   while (rdma_get_cm_event(event_channel, &event) == 0) {
     struct rdma_cm_event event_copy;
     memcpy(&event_copy, event, sizeof(*event));
     rdma_ack_cm_event(event);
-
     if (on_event(&event_copy))
       break;
   }
@@ -42,6 +42,7 @@ int RdmaServer::start() {
 
 int RdmaServer::on_event(struct rdma_cm_event *event) {
     int r = 0;
+    printf("on event %d\n", event->event); 
       switch(event->event ){
         case RDMA_CM_EVENT_CONNECT_REQUEST:
         {
@@ -59,10 +60,9 @@ int RdmaServer::on_event(struct rdma_cm_event *event) {
         {
           r = on_disconnect(event->id);
         }
-        
         break; 
         default:
-        printf("unknown event %d\n", event->event ) ;
+		printf("unknown event %d\n", event->event ) ;
       }
 
     return r;
@@ -71,22 +71,25 @@ int RdmaServer::on_event(struct rdma_cm_event *event) {
 
 void RdmaServer::init_context(struct ibv_context *verbs) {
 
-    if (rdma_context.ctx != verbs) {
-        printf("cannot handle events in more than one context.");
-        return;
+    printf("init context \n"); 
+    if (rdma_context.is_inited )
+    {
+	if (rdma_context.ctx != verbs) {
+		printf("cannot handle events in more than one context.");
+		return;
+	}
+	return ; 
     }
+    
 
     rdma_context.ctx = verbs;
-
     rdma_context.pd = ibv_alloc_pd(rdma_context.ctx);
-    rdma_context.comp_channel =
-                ibv_create_comp_channel(rdma_context.ctx);
-    rdma_context.cq = ibv_create_cq(rdma_context.ctx, 10, NULL,
-                                            rdma_context.comp_channel,
-                                            0); /* cqe=10 is arbitrary */
+    rdma_context.comp_channel = ibv_create_comp_channel(rdma_context.ctx);
+    rdma_context.cq = ibv_create_cq(rdma_context.ctx, 10, NULL, rdma_context.comp_channel, 0); /* cqe=10 is arbitrary */
 
     ibv_req_notify_cq(rdma_context.cq, 0); //#完成完成队列与完成通道的关联
 
+    rdma_context.is_inited = true; 
 
     rdma_context.poller_worker  = std::thread([this](){
         this->poll(); 
@@ -149,8 +152,8 @@ void RdmaServer::init_context(struct ibv_context *verbs) {
 
     struct ibv_qp_init_attr qpAttr;
     init_qp_attr(&qpAttr);
-
     rdma_create_qp(id, rdma_context.pd, &qpAttr);
+
     RdmaConnection *conn = new RdmaConnection(&rdma_context ); 
     conn->init(id);   
 
