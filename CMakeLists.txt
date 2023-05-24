@@ -39,6 +39,7 @@ include_directories(opt/concurrentqueue/)
 
 include_directories(./opt/rdma-core/build/include)
 link_directories(./opt/rdma-core/build/)
+link_directories(./opt/rdma-core/build/lib)
 
 link_directories(bin)
 set(KBUSVER  kbus-v1.0.1208) 
@@ -53,6 +54,7 @@ add_library(pyhds SHARED src/pyhds.cpp)
 target_compile_options(pyhds PRIVATE -frtti  -fvisibility=default)
 target_link_libraries(pyhds hds ) 
 endif() 
+
 
 
 
